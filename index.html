@@ -1125,8 +1125,67 @@
             </div>
           </div>
 
-          <!-- Quick Actions -->
+          <!-- Quick Stats -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Weekly Average -->
+            <div class="bg-white rounded-xl p-4 border-2 border-gray-200">
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center"
+                >
+                  <i
+                    class="fa-solid fa-chart-line text-emerald-600 text-xl"
+                  ></i>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500">Weekly Average</p>
+                  <p
+                    id="weekly-average"
+                    class="text-xl font-bold text-gray-900"
+                  >
+                    0 kcal
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Total Items This Week -->
+            <div class="bg-white rounded-xl p-4 border-2 border-gray-200">
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center"
+                >
+                  <i class="fa-solid fa-utensils text-blue-600 text-xl"></i>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500">Total Items This Week</p>
+                  <p id="weekly-items" class="text-xl font-bold text-gray-900">
+                    0 items
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Days On Goal -->
+            <div class="bg-white rounded-xl p-4 border-2 border-gray-200">
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center"
+                >
+                  <i class="fa-solid fa-bullseye text-purple-600 text-xl"></i>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500">Days On Goal</p>
+                  <p id="days-on-goal" class="text-xl font-bold text-gray-900">
+                    0 / 7
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
             <button
               class="quick-log-btn bg-white rounded-xl p-4 border-2 border-gray-200 hover:border-emerald-500 transition-all text-left flex items-center gap-4"
               data-action="log-meal"
@@ -1172,6 +1231,7 @@
               </div>
             </button>
           </div>
+
         </div>
       </section>
     </div>

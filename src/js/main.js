@@ -1429,9 +1429,7 @@ renderMealDetail(meal) {
       month: "short",
       day: "numeric",
     });
-
     const totals = getTodayTotals();
-
     this.updateProgress(
       "calories",
       totals.calories,
@@ -1441,12 +1439,9 @@ renderMealDetail(meal) {
     this.updateProgress("protein", totals.protein, state.goals.protein, " g");
     this.updateProgress("carbs", totals.carbs, state.goals.carbs, " g");
     this.updateProgress("fat", totals.fat, state.goals.fat, " g");
-
     const entries = getTodayEntries();
-
     this.el.loggedItemsCount.textContent = `Logged Items (${entries.length})`;
     this.el.clearFoodlogBtn.style.display = entries.length ? "" : "none";
-
     this.el.loggedItemsList.innerHTML = entries.length
       ? [...entries].reverse().map(ui.loggedItemHTML).join("")
       : `
@@ -1455,31 +1450,25 @@ renderMealDetail(meal) {
         <p class="font-medium">No meals logged today</p>
         <p class="text-sm">Add meals from the Meals page or scan products</p>
       </div>`;
-
     this.renderWeeklyChart();
+    this.renderWeeklyStats();
   }
 
   updateProgress(key, value, goal, unit) {
     const rounded = Math.round(value);
     const percent = clampPercent(rounded, goal);
-
     // Current value
     const currentElement = document.getElementById(`progress-${key}-current`);
-
     // Percentage
     const percentElement = document.getElementById(`progress-${key}-percent`);
-
     // Goal
     const labelElement = document.getElementById(`progress-${key}-label`);
-
     // Progress bar
     const barElement = document.getElementById(`progress-${key}-bar`);
-
     // ------------------------------------------
     // Normal / Danger colors
     // ------------------------------------------
     const isExceeded = rounded >= goal;
-
     const colors = {
       calories: {
         normal: "emerald",
@@ -1494,18 +1483,14 @@ renderMealDetail(meal) {
         normal: "purple",
       },
     };
-
     const normalColor = colors[key]?.normal || "emerald";
-
     if (isExceeded) {
       // Percentage → Red
       percentElement?.classList.remove(`text-${normalColor}-600`);
       percentElement?.classList.add("text-red-500");
-
       // Current value → Red
       currentElement?.classList.remove(`text-${normalColor}-600`);
       currentElement?.classList.add("text-red-600");
-
       // Progress bar → Red
       barElement?.classList.remove(`bg-${normalColor}-500`);
       barElement?.classList.add("bg-red-500");
@@ -1513,11 +1498,9 @@ renderMealDetail(meal) {
       // Percentage → Normal
       percentElement?.classList.remove("text-red-500");
       percentElement?.classList.add(`text-${normalColor}-600`);
-
       // Current value → Normal
       currentElement?.classList.remove("text-red-600");
       currentElement?.classList.add(`text-${normalColor}-600`);
-
       // Progress bar → Normal
       barElement?.classList.remove("bg-red-500");
       barElement?.classList.add(`bg-${normalColor}-500`);
@@ -1526,19 +1509,15 @@ renderMealDetail(meal) {
     // ------------------------------------------
     // Update values
     // ------------------------------------------
-
     if (currentElement) {
       currentElement.textContent = `${rounded}${unit}`;
     }
-
     if (percentElement) {
       percentElement.textContent = `${percent}%`;
     }
-
     if (labelElement) {
       labelElement.textContent = `/ ${goal}${unit}`;
     }
-
     if (barElement) {
       barElement.style.width = `${percent}%`;
     }
@@ -1546,22 +1525,16 @@ renderMealDetail(meal) {
 
   renderWeeklyChart() {
     if (!this.el.weeklyChart) return;
-
     const days = getWeeklyCalories();
-
     const today = new Date();
     const todayDate = today.toISOString().split("T")[0];
-
     this.el.weeklyChart.innerHTML = days
       .map((day) => {
         const isToday = day.date === todayDate;
-
         const dayNumber = new Date(day.date).getDate();
-
         const dayName = new Date(day.date).toLocaleDateString("en-US", {
           weekday: "short",
         });
-
         return `
         <div
           class="text-center rounded-xl p-2 ${isToday ? "bg-indigo-100" : ""}"
@@ -1569,11 +1542,9 @@ renderMealDetail(meal) {
           <p class="text-xs text-gray-500 mb-1">
             ${dayName}
           </p>
-
           <p class="text-sm font-medium text-gray-900">
             ${dayNumber}
           </p>
-
           <div
             class="mt-2 ${
               day.calories > 0 ? "text-emerald-600" : "text-gray-300"
@@ -1582,7 +1553,6 @@ renderMealDetail(meal) {
             <p class="text-lg font-bold">
               ${Math.round(day.calories)}
             </p>
-
             <p class="text-xs">
               kcal
             </p>
@@ -1592,6 +1562,41 @@ renderMealDetail(meal) {
       })
       .join("");
   }
+
+  renderWeeklyStats() {
+  const days = getWeeklyCalories();
+  // Weekly Average
+  const totalCalories = days.reduce(
+    (sum, day) => sum + day.calories,
+    0
+  );
+  const weeklyAverage = Math.round(totalCalories / days.length);
+  // Total Items This Week
+  const totalItems = days.reduce((count, day) => {
+    const entries = state.foodlog[day.date] || [];
+    return count + entries.length;
+  }, 0);
+  // Days On Goal
+  const goal = state.goals.calories;
+  const daysOnGoal = days.filter(
+    (day) => day.calories >= goal
+  ).length;
+  // Update UI
+  const averageElement = document.getElementById("weekly-average");
+  const itemsElement = document.getElementById("weekly-items");
+  const goalElement = document.getElementById("days-on-goal");
+  if (averageElement) {
+    averageElement.textContent = `${weeklyAverage} kcal`;
+  }
+  if (itemsElement) {
+    itemsElement.textContent = `${totalItems} ${
+      totalItems === 1 ? "item" : "items"
+    }`;
+  }
+  if (goalElement) {
+    goalElement.textContent = `${daysOnGoal} / 7`;
+  }
+}
 }
 
 // ---------------------------------------------------------------------------

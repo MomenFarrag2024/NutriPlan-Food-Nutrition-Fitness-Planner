@@ -317,7 +317,10 @@ export class App {
     try {
       this.el.recipesGrid.innerHTML = ui.skeletonGridHTML(8);
       const meals = await mealdb.filterByCategory(category);
-      const mealsWithCategory = meals.map((meal) => ({
+      const detailedMeals = await Promise.all(
+        meals.map((meal) => mealdb.getMealById(meal.idMeal)),
+      );
+      const mealsWithCategory = detailedMeals.map((meal) => ({
         ...meal,
         strCategory: category,
       }));
@@ -337,23 +340,15 @@ export class App {
   async loadRecipesByArea(area) {
     try {
       this.el.recipesGrid.innerHTML = ui.skeletonGridHTML(8);
-
       const meals = await mealdb.filterByArea(area);
-
-      const mealsWithDetails = await Promise.all(
-        meals.map(async (meal) => {
-          const details = await mealdb.getMealById(meal.idMeal);
-
-          return {
-            ...meal,
-            strArea: area,
-            strCategory: details?.strCategory || "",
-          };
-        }),
+      const detailedMeals = await Promise.all(
+        meals.map((meal) => mealdb.getMealById(meal.idMeal)),
       );
-
+      const mealsWithDetails = detailedMeals.map((meal) => ({
+        ...meal,
+        strArea: area,
+      }));
       state.visibleMeals = mealsWithDetails;
-
       this.renderRecipes(
         mealsWithDetails,
         `Showing ${mealsWithDetails.length} ${area} recipes`,
@@ -469,130 +464,104 @@ export class App {
     if (card) this.openMealDetail(card.dataset.mealId);
   }
 
-async openMealDetail(mealId) {
-  try {
-    const meal = await mealdb.getMealById(mealId);
-
-    if (!meal) {
-      toast("Recipe not found", "error");
-      return;
+  async openMealDetail(mealId) {
+    try {
+      const meal = await mealdb.getMealById(mealId);
+      if (!meal) {
+        toast("Recipe not found", "error");
+        return;
+      }
+      state.currentMeal = meal;
+      // Show details page first
+      this.hideAllPagesExcept("__detail__");
+      this.el.mealDetailsSection.style.display = "";
+      // Render recipe + nutrition
+      this.renderMealDetail(meal);
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    } catch (err) {
+      console.error(err);
+      toast("Couldn't load that recipe", "error");
     }
-
-    state.currentMeal = meal;
-
-    // Show details page first
-    this.hideAllPagesExcept("__detail__");
-    this.el.mealDetailsSection.style.display = "";
-
-    // Render recipe + nutrition
-    this.renderMealDetail(meal);
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-
-  } catch (err) {
-    console.error(err);
-    toast("Couldn't load that recipe", "error");
   }
-}
 
   closeMealDetail() {
     this.hideAllPagesExcept("meals");
   }
 
-renderMealDetail(meal) {
-  const ingredients = mealdb.extractIngredients(meal);
-  const steps = mealdb.extractInstructionSteps(meal);
-  const servings = 4;
-
-  // --------------------------------------------------
-  // Log Meal Button - Loading State
-  // --------------------------------------------------
-  this.el.logMealBtn.disabled = true;
-  this.el.logMealBtn.className =
-    "flex items-center gap-2 px-6 py-3 bg-gray-300 text-gray-500 rounded-xl font-semibold cursor-not-allowed transition-all";
-  this.el.logMealBtn.title = "Waiting for nutrition data...";
-  this.el.logMealBtn.innerHTML = `
+  renderMealDetail(meal) {
+    const ingredients = mealdb.extractIngredients(meal);
+    const steps = mealdb.extractInstructionSteps(meal);
+    const servings = 4;
+    // --------------------------------------------------
+    // Log Meal Button - Loading State
+    // --------------------------------------------------
+    this.el.logMealBtn.disabled = true;
+    this.el.logMealBtn.className =
+      "flex items-center gap-2 px-6 py-3 bg-gray-300 text-gray-500 rounded-xl font-semibold cursor-not-allowed transition-all";
+    this.el.logMealBtn.title = "Waiting for nutrition data...";
+    this.el.logMealBtn.innerHTML = `
     <i class="fa-solid fa-spinner fa-spin"></i>
     <span>Calculating...</span>
   `;
-
-  // --------------------------------------------------
-  // Recipe Details
-  // --------------------------------------------------
-  this.el.heroImage.src = meal.strMealThumb;
-  this.el.heroImage.alt = meal.strMeal;
-
-  this.el.heroTitle.textContent = meal.strMeal;
-
-  this.el.heroBadges.innerHTML = [meal.strCategory, meal.strArea]
-    .filter(Boolean)
-    .map(
-      (label, i) =>
-        `<span class="px-3 py-1 ${
-          i === 0 ? "bg-emerald-500" : "bg-blue-500"
-        } text-white text-sm font-semibold rounded-full">${label}</span>`,
-    )
-    .join("");
-
-  this.el.heroServings.textContent = `${servings} servings`;
-
-  this.el.ingredientsCount.textContent = `${ingredients.length} items`;
-
-  this.el.ingredientsList.innerHTML = ingredients
-    .map(ui.ingredientRowHTML)
-    .join("");
-
-  this.el.instructionsList.innerHTML = steps.length
-    ? steps.map(ui.instructionStepHTML).join("")
-    : `<p class="text-gray-500">
+    // --------------------------------------------------
+    // Recipe Details
+    // --------------------------------------------------
+    this.el.heroImage.src = meal.strMealThumb;
+    this.el.heroImage.alt = meal.strMeal;
+    this.el.heroTitle.textContent = meal.strMeal;
+    this.el.heroBadges.innerHTML = [meal.strCategory, meal.strArea]
+      .filter(Boolean)
+      .map(
+        (label, i) =>
+          `<span class="px-3 py-1 ${
+            i === 0 ? "bg-emerald-500" : "bg-blue-500"
+          } text-white text-sm font-semibold rounded-full">${label}</span>`,
+      )
+      .join("");
+    this.el.heroServings.textContent = `${servings} servings`;
+    this.el.ingredientsCount.textContent = `${ingredients.length} items`;
+    this.el.ingredientsList.innerHTML = ingredients
+      .map(ui.ingredientRowHTML)
+      .join("");
+    this.el.instructionsList.innerHTML = steps.length
+      ? steps.map(ui.instructionStepHTML).join("")
+      : `<p class="text-gray-500">
         No instructions provided for this recipe.
       </p>`;
-
-  // --------------------------------------------------
-  // YouTube
-  // --------------------------------------------------
-  if (meal.strYoutube) {
-    this.el.videoSection.style.display = "";
-
-    const videoId = new URL(meal.strYoutube).searchParams.get("v");
-
-    this.el.videoIframe.src = videoId
-      ? `https://www.youtube.com/embed/${videoId}`
-      : "";
-  } else {
-    this.el.videoSection.style.display = "none";
-  }
-
-  // --------------------------------------------------
-  // Nutrition Calculation
-  // --------------------------------------------------
-  const nutrition = estimateNutrition(ingredients.length);
-
-  this.el.heroCalories.textContent =
-    `~${nutrition.calories} cal/serving`;
-
-  this.updateNutritionFacts(nutrition, servings);
-
-  // --------------------------------------------------
-  // Log Meal Button - Ready State
-  // --------------------------------------------------
-  this.el.logMealBtn.dataset.mealId = meal.idMeal;
-
-  this.el.logMealBtn.disabled = false;
-
-  this.el.logMealBtn.className =
-    "flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all";
-
-  this.el.logMealBtn.title = "";
-
-  this.el.logMealBtn.innerHTML = `
+    // --------------------------------------------------
+    // YouTube
+    // --------------------------------------------------
+    if (meal.strYoutube) {
+      this.el.videoSection.style.display = "";
+      const videoId = new URL(meal.strYoutube).searchParams.get("v");
+      this.el.videoIframe.src = videoId
+        ? `https://www.youtube.com/embed/${videoId}`
+        : "";
+    } else {
+      this.el.videoSection.style.display = "none";
+    }
+    // --------------------------------------------------
+    // Nutrition Calculation
+    // --------------------------------------------------
+    const nutrition = estimateNutrition(ingredients.length);
+    this.el.heroCalories.textContent = `~${nutrition.calories} cal/serving`;
+    this.updateNutritionFacts(nutrition, servings);
+    // --------------------------------------------------
+    // Log Meal Button - Ready State
+    // --------------------------------------------------
+    this.el.logMealBtn.dataset.mealId = meal.idMeal;
+    this.el.logMealBtn.disabled = false;
+    this.el.logMealBtn.className =
+      "flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all";
+    this.el.logMealBtn.title = "";
+    this.el.logMealBtn.innerHTML = `
     <i class="fa-solid fa-clipboard-list"></i>
     <span>Log This Meal</span>
   `;
-}
+  }
 
   updateNutritionFacts(nutrition, servings) {
     document.getElementById("nutri-calories").textContent = nutrition.calories;
@@ -999,20 +968,14 @@ renderMealDetail(meal) {
 
   openProductLogModal(product) {
     let servings = 1;
-
     const modal = document.createElement("div");
-
     modal.id = "log-product-modal";
-
     modal.className =
       "fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4";
-
     modal.innerHTML = `
     <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
-
       <!-- Header -->
       <div class="flex items-center gap-4 mb-6">
-
         ${
           product.image
             ? `
@@ -1028,16 +991,13 @@ renderMealDetail(meal) {
               </div>
             `
         }
-
         <div>
           <h3 class="text-xl font-bold text-gray-900">
             Log This Product
           </h3>
-
           <p class="text-gray-500 text-sm">
             ${escapeHtml(product.name)}
           </p>
-
           ${
             product.brand
               ? `
@@ -1048,25 +1008,19 @@ renderMealDetail(meal) {
               : ""
           }
         </div>
-
       </div>
-
       <!-- Servings -->
       <div class="mb-6">
-
         <label class="block text-sm font-semibold text-gray-700 mb-2">
           Number of Servings
         </label>
-
         <div class="flex items-center gap-3">
-
           <button
             id="decrease-product-servings"
             class="w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
           >
             <i class="fa-solid fa-minus text-gray-600"></i>
           </button>
-
           <input
             type="number"
             id="product-servings"
@@ -1076,26 +1030,20 @@ renderMealDetail(meal) {
             step="0.5"
             class="w-20 text-center text-xl font-bold border-2 border-gray-200 rounded-lg py-2"
           />
-
           <button
             id="increase-product-servings"
             class="w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
           >
             <i class="fa-solid fa-plus text-gray-600"></i>
           </button>
-
         </div>
       </div>
-
       <!-- Nutrition -->
       <div class="bg-emerald-50 rounded-xl p-4 mb-6">
-
         <p class="text-sm text-gray-600 mb-2">
           Estimated nutrition per serving:
         </p>
-
         <div class="grid grid-cols-4 gap-2 text-center">
-
           <div>
             <p
               id="product-modal-calories"
@@ -1103,12 +1051,10 @@ renderMealDetail(meal) {
             >
               ${Math.round(product.caloriesPer100g || 0)}
             </p>
-
             <p class="text-xs text-gray-500">
               Calories
             </p>
           </div>
-
           <div>
             <p
               id="product-modal-protein"
@@ -1116,12 +1062,10 @@ renderMealDetail(meal) {
             >
               ${Math.round(product.proteinPer100g || 0)}g
             </p>
-
             <p class="text-xs text-gray-500">
               Protein
             </p>
           </div>
-
           <div>
             <p
               id="product-modal-carbs"
@@ -1129,12 +1073,10 @@ renderMealDetail(meal) {
             >
               ${Math.round(product.carbsPer100g || 0)}g
             </p>
-
             <p class="text-xs text-gray-500">
               Carbs
             </p>
           </div>
-
           <div>
             <p
               id="product-modal-fat"
@@ -1142,25 +1084,20 @@ renderMealDetail(meal) {
             >
               ${Math.round(product.fatPer100g || 0)}g
             </p>
-
             <p class="text-xs text-gray-500">
               Fat
             </p>
           </div>
-
         </div>
       </div>
-
       <!-- Actions -->
       <div class="flex gap-3">
-
         <button
           id="cancel-log-product"
           class="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all"
         >
           Cancel
         </button>
-
         <button
           id="confirm-log-product"
           class="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-all"
@@ -1168,14 +1105,10 @@ renderMealDetail(meal) {
           <i class="fa-solid fa-clipboard-list mr-2"></i>
           Log Product
         </button>
-
       </div>
-
     </div>
   `;
-
     document.body.appendChild(modal);
-
     const servingsInput = modal.querySelector("#product-servings");
     const decreaseBtn = modal.querySelector("#decrease-product-servings");
     const increaseBtn = modal.querySelector("#increase-product-servings");
@@ -1564,39 +1497,36 @@ renderMealDetail(meal) {
   }
 
   renderWeeklyStats() {
-  const days = getWeeklyCalories();
-  // Weekly Average
-  const totalCalories = days.reduce(
-    (sum, day) => sum + day.calories,
-    0
-  );
-  const weeklyAverage = Math.round(totalCalories / days.length);
-  // Total Items This Week
-  const totalItems = days.reduce((count, day) => {
-    const entries = state.foodlog[day.date] || [];
-    return count + entries.length;
-  }, 0);
-  // Days On Goal
-  const goal = state.goals.calories;
-  const daysOnGoal = days.filter(
-    (day) => day.calories <= goal && day.calories > 0
-  ).length;
-  // Update UI
-  const averageElement = document.getElementById("weekly-average");
-  const itemsElement = document.getElementById("weekly-items");
-  const goalElement = document.getElementById("days-on-goal");
-  if (averageElement) {
-    averageElement.textContent = `${weeklyAverage} kcal`;
+    const days = getWeeklyCalories();
+    // Weekly Average
+    const totalCalories = days.reduce((sum, day) => sum + day.calories, 0);
+    const weeklyAverage = Math.round(totalCalories / days.length);
+    // Total Items This Week
+    const totalItems = days.reduce((count, day) => {
+      const entries = state.foodlog[day.date] || [];
+      return count + entries.length;
+    }, 0);
+    // Days On Goal
+    const goal = state.goals.calories;
+    const daysOnGoal = days.filter(
+      (day) => day.calories <= goal && day.calories > 0,
+    ).length;
+    // Update UI
+    const averageElement = document.getElementById("weekly-average");
+    const itemsElement = document.getElementById("weekly-items");
+    const goalElement = document.getElementById("days-on-goal");
+    if (averageElement) {
+      averageElement.textContent = `${weeklyAverage} kcal`;
+    }
+    if (itemsElement) {
+      itemsElement.textContent = `${totalItems} ${
+        totalItems === 1 ? "item" : "items"
+      }`;
+    }
+    if (goalElement) {
+      goalElement.textContent = `${daysOnGoal} / 7`;
+    }
   }
-  if (itemsElement) {
-    itemsElement.textContent = `${totalItems} ${
-      totalItems === 1 ? "item" : "items"
-    }`;
-  }
-  if (goalElement) {
-    goalElement.textContent = `${daysOnGoal} / 7`;
-  }
-}
 }
 
 // ---------------------------------------------------------------------------

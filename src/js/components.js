@@ -216,8 +216,8 @@ export class Components {
           loading="lazy"
         />
         <div class="absolute bottom-3 left-3 flex gap-2">
-          ${meal.strCategory ? `<span class="px-2 py-1 bg-white/90 backdrop-blur-sm text-xs font-semibold rounded-full text-gray-700">${escapeHtml(meal.strCategory)}</span>` : ""}
-          ${meal.strArea ? `<span class="px-2 py-1 bg-emerald-500 text-xs font-semibold rounded-full text-white">${escapeHtml(meal.strArea)}</span>` : ""}
+          ${meal.strCategory ? `<span class="px-2 py-1 bg-white/90 backdrop-blur-sm text-xs font-semibold rounded-lg"><i class="fa-solid fa-tag mr-1 text-green-600"></i> ${escapeHtml(meal.strCategory)}</span>` : ""}
+          ${meal.strArea ? `<span class="px-2 py-1 bg-white/90 backdrop-blur-sm text-xs font-semibold rounded-lg"><i class="fa-solid fa-globe mr-1 text-blue-600"></i> ${escapeHtml(meal.strArea)}</span>` : ""}
         </div>
       </div>
       <div class="p-4">

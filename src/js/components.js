@@ -33,7 +33,11 @@ export class Components {
   }
 
   // =========== Empty State ============
-  static emptyStateHTML(title = "Nothing found", subtitle = "Try a different search", icon = "fa-search") {
+  static emptyStateHTML(
+    title = "Nothing found",
+    subtitle = "Try a different search",
+    icon = "fa-search",
+  ) {
     return `
     <div class="empty-state flex flex-col items-center justify-center py-12 text-center col-span-full">
       <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
@@ -330,9 +334,18 @@ export class Components {
     d: "bg-orange-500",
     e: "bg-red-500",
   };
+  static GRAD_COLORS = {
+    1: "bg-green-500",
+    2: "bg-yellow-500",
+    3: "bg-orange-500",
+    4: "bg-red-500",
+  };
 
   static productCardHTML(product) {
-    const gradeColor = Components.GRADE_COLORS[product.nutriScore] || "bg-gray-400";
+    const gradeColor =
+      Components.GRADE_COLORS[product.nutriScore] || "bg-gray-400";
+    const gradColor =
+      Components.GRAD_COLORS[product.novaGroup] || "bg-gray-400";
 
     return `
     <div class="product-card bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all cursor-pointer group" data-barcode="${escapeHtml(product.barcode)}">
@@ -349,7 +362,7 @@ export class Components {
         }
         ${
           product.novaGroup
-            ? `<div class="none absolute top-2 right-2 bg-lime-500 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center" title="NOVA ${product.novaGroup}">${product.novaGroup}</div>`
+            ? `<div class="none absolute top-2 right-2 ${gradColor} text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center" title="NOVA ${product.novaGroup}">${product.novaGroup}</div>`
             : ""
         }
       </div>
@@ -382,9 +395,434 @@ export class Components {
     </div>`;
   }
 
+  static productDetailModalHTML(product) {
+    const grade = String(product.nutriScore || "").toLowerCase();
+
+    const gradeColors = {
+      a: {
+        bg: "#16a34a",
+        light: "#dcfce720",
+        text: "A",
+        label: "Excellent",
+      },
+      b: {
+        bg: "#65a30d",
+        light: "#ecfccb",
+        text: "B",
+        label: "Good",
+      },
+      c: {
+        bg: "#eab308",
+        light: "#fecb0220",
+        text: "C",
+        label: "Average",
+      },
+      d: {
+        bg: "#f97316",
+        light: "#ffedd5",
+        text: "D",
+        label: "Poor",
+      },
+      e: {
+        bg: "#dc2626",
+        light: "#fee2e2",
+        text: "E",
+        label: "Very poor",
+      },
+    };
+
+    const gradeInfo = gradeColors[grade] || {
+      bg: "#999",
+      light: "#f3f4f620",
+      text: "UNKNOWN",
+      label: "Unknown",
+    };
+
+    const nova = Number(product.novaGroup || 0);
+
+    const novaInfo = {
+      1: {
+        label: "Unprocessed",
+        color: "#16a34a",
+      },
+      2: {
+        label: "Processed culinary ingredients",
+        color: "#65a30d",
+      },
+      3: {
+        label: "Processed",
+        color: "#eab308",
+      },
+      4: {
+        label: "Ultra-processed",
+        color: "#e63e11",
+      },
+    };
+
+    const novaData = novaInfo[nova];
+
+    const protein = Number(product.proteinPer100g || 0);
+    const carbs = Number(product.carbsPer100g || 0);
+    const fat = Number(product.fatPer100g || 0);
+    const sugar = Number(product.sugarPer100g || 0);
+
+    const saturatedFat = Number(product.saturatedFatPer100g || 0);
+    const fiber = Number(product.fiberPer100g || 0);
+    const salt = Number(product.saltPer100g || 0);
+
+    const getPercent = (value, max = 30) =>
+      Math.min(100, Math.round((value / max) * 100));
+
+    return `
+    <div
+      id="product-detail-modal"
+      class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 overflow-y-auto"
+    >
+      <div
+        class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+      >
+        <div class="p-6">
+
+          <!-- Header -->
+          <div class="flex items-start gap-6 mb-6">
+
+            <!-- Product Image -->
+            <div
+              class="w-32 h-32 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0"
+            >
+              ${
+                product.image
+                  ? `
+                    <img
+                      src="${escapeHtml(product.image)}"
+                      alt="${escapeHtml(product.name)}"
+                      class="w-full h-full object-contain"
+                    />
+                  `
+                  : `
+                    <i class="fa-solid fa-box-open text-gray-300 text-4xl"></i>
+                  `
+              }
+            </div>
+
+            <!-- Product Info -->
+            <div class="flex-1 min-w-0">
+
+              <!-- Brand -->
+              <p class="text-sm text-emerald-600 font-semibold mb-1">
+                ${escapeHtml(product.brand || "Unknown brand")}
+              </p>
+
+              <!-- Name -->
+              <h2 class="text-2xl font-bold text-gray-900 mb-2">
+                ${escapeHtml(product.name)}
+              </h2>
+
+              <!-- Quantity -->
+              ${
+                product.quantity
+                  ? `
+                    <p class="text-sm text-gray-500 mb-3">
+                      ${escapeHtml(product.quantity)}
+                    </p>
+                  `
+                  : ""
+              }
+
+              <!-- Nutri Score + NOVA -->
+              <div class="flex items-center gap-3 flex-wrap">
+
+                <!-- Nutri Score -->
+                <div
+                  class="flex items-center gap-2 px-3 py-1.5 rounded-lg"
+                  style="background-color: ${gradeInfo.light}"
+                >
+
+                  <span
+                    class="w-8 h-8 rounded flex items-center justify-center text-white font-bold"
+                    style="background-color: ${gradeInfo.bg}"
+                  >
+                    ${gradeInfo.text}
+                  </span>
+
+                  <div>
+                    <p
+                      class="text-xs font-bold"
+                      style="color: ${gradeInfo.bg}"
+                    >
+                      Nutri-Score
+                    </p>
+
+                    <p class="text-[10px] text-gray-600">
+                      ${gradeInfo.label}
+                    </p>
+                  </div>
+
+                </div>
+
+                <!-- NOVA -->
+                ${
+                  novaData
+                    ? `
+                      <div
+                        class="flex items-center gap-2 px-3 py-1.5 rounded-lg"
+                        style="background-color: ${novaData.color}20"
+                      >
+
+                        <span
+                          class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold"
+                          style="background-color: ${novaData.color}"
+                        >
+                          ${nova}
+                        </span>
+
+                        <div>
+                          <p
+                            class="text-xs font-bold"
+                            style="color: ${novaData.color}"
+                          >
+                            NOVA
+                          </p>
+
+                          <p class="text-[10px] text-gray-600">
+                            ${novaData.label}
+                          </p>
+                        </div>
+
+                      </div>
+                    `
+                    : ""
+                }
+
+              </div>
+            </div>
+
+            <!-- Close -->
+            <button
+              class="close-product-modal text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Close"
+            >
+              <i class="fa-solid fa-xmark text-2xl"></i>
+            </button>
+
+          </div>
+
+
+          <!-- Nutrition Facts -->
+          <div
+            class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-5 mb-6 border border-emerald-200"
+          >
+
+            <h3
+              class="font-bold text-gray-900 mb-4 flex items-center gap-2"
+            >
+              <i class="fa-solid fa-chart-pie text-emerald-600"></i>
+
+              Nutrition Facts
+
+              <span class="text-sm font-normal text-gray-500">
+                (per 100g)
+              </span>
+            </h3>
+
+
+            <!-- Calories -->
+            <div
+              class="text-center mb-4 pb-4 border-b border-emerald-200"
+            >
+              <p class="text-4xl font-bold text-gray-900">
+                ${Math.round(product.caloriesPer100g || 0)}
+              </p>
+
+              <p class="text-sm text-gray-500">
+                Calories
+              </p>
+            </div>
+
+
+            <!-- Main Nutrition -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+              <!-- Protein -->
+              <div class="text-center">
+
+                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                  <div
+                    class="bg-emerald-500 h-2 rounded-full"
+                    style="width: ${getPercent(protein)}%"
+                  ></div>
+                </div>
+
+                <p class="text-lg font-bold text-emerald-600">
+                  ${protein.toFixed(1)}g
+                </p>
+
+                <p class="text-xs text-gray-500">
+                  Protein
+                </p>
+
+              </div>
+
+
+              <!-- Carbs -->
+              <div class="text-center">
+
+                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                  <div
+                    class="bg-blue-500 h-2 rounded-full"
+                    style="width: ${getPercent(carbs)}%"
+                  ></div>
+                </div>
+
+                <p class="text-lg font-bold text-blue-600">
+                  ${carbs.toFixed(1)}g
+                </p>
+
+                <p class="text-xs text-gray-500">
+                  Carbs
+                </p>
+
+              </div>
+
+
+              <!-- Fat -->
+              <div class="text-center">
+
+                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                  <div
+                    class="bg-purple-500 h-2 rounded-full"
+                    style="width: ${getPercent(fat)}%"
+                  ></div>
+                </div>
+
+                <p class="text-lg font-bold text-purple-600">
+                  ${fat.toFixed(1)}g
+                </p>
+
+                <p class="text-xs text-gray-500">
+                  Fat
+                </p>
+
+              </div>
+
+
+              <!-- Sugar -->
+              <div class="text-center">
+
+                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                  <div
+                    class="bg-orange-500 h-2 rounded-full"
+                    style="width: ${getPercent(sugar, 50)}%"
+                  ></div>
+                </div>
+
+                <p class="text-lg font-bold text-orange-600">
+                  ${sugar.toFixed(1)}g
+                </p>
+
+                <p class="text-xs text-gray-500">
+                  Sugar
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <!-- Additional Nutrition -->
+            <div
+              class="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-emerald-200"
+            >
+
+              <div class="text-center">
+                <p class="text-sm font-semibold text-gray-900">
+                  ${saturatedFat.toFixed(1)}g
+                </p>
+
+                <p class="text-xs text-gray-500">
+                  Saturated Fat
+                </p>
+              </div>
+
+              <div class="text-center">
+                <p class="text-sm font-semibold text-gray-900">
+                  ${fiber.toFixed(1)}g
+                </p>
+
+                <p class="text-xs text-gray-500">
+                  Fiber
+                </p>
+              </div>
+
+              <div class="text-center">
+                <p class="text-sm font-semibold text-gray-900">
+                  ${salt.toFixed(2)}g
+                </p>
+
+                <p class="text-xs text-gray-500">
+                  Salt
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- Ingredients -->
+          ${
+            product.ingredients
+              ? `
+                <div class="bg-gray-50 rounded-xl p-5 mb-6">
+
+                  <h3
+                    class="font-bold text-gray-900 mb-3 flex items-center gap-2"
+                  >
+                    <i class="fa-solid fa-list text-gray-600"></i>
+
+                    Ingredients
+                  </h3>
+
+                  <p
+                    class="text-sm text-gray-600 leading-relaxed"
+                  >
+                    ${escapeHtml(product.ingredients)}
+                  </p>
+
+                </div>
+              `
+              : ""
+          }
+
+
+          <!-- Actions -->
+          <div class="flex gap-3">
+
+            <button
+              class="add-product-to-log flex-1 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-all"
+              data-barcode="${escapeHtml(product.barcode)}"
+            >
+              <i class="fa-solid fa-plus mr-2"></i>
+              Log This Food
+            </button>
+
+            <button
+              class="close-product-modal flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all"
+            >
+              Close
+            </button>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+  `;
+  }
+
   // =========== Food Log: logged item row ============
   static loggedItemHTML(entry) {
-    const time = new Date(entry.loggedAt).toLocaleTimeString(undefined, {
+    const time = new Date(entry.loggedAt).toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
     });
@@ -495,6 +933,10 @@ export function instructionStepHTML(step, index) {
 
 export function productCardHTML(product) {
   return Components.productCardHTML(product);
+}
+
+export function productDetailModalHTML(product) {
+  return Components.productDetailModalHTML(product);
 }
 
 export function loggedItemHTML(entry) {

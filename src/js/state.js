@@ -42,7 +42,9 @@ export class AppState {
 
   #loadFavorites() {
     try {
-      return new Set(JSON.parse(localStorage.getItem(AppState.STORAGE_KEYS.FAVORITES)) || []);
+      return new Set(
+        JSON.parse(localStorage.getItem(AppState.STORAGE_KEYS.FAVORITES)) || [],
+      );
     } catch {
       return new Set();
     }
@@ -50,18 +52,26 @@ export class AppState {
 
   #loadFoodlog() {
     try {
-      return JSON.parse(localStorage.getItem(AppState.STORAGE_KEYS.FOODLOG)) || {};
+      return (
+        JSON.parse(localStorage.getItem(AppState.STORAGE_KEYS.FOODLOG)) || {}
+      );
     } catch {
       return {};
     }
   }
 
   #saveFavorites() {
-    localStorage.setItem(AppState.STORAGE_KEYS.FAVORITES, JSON.stringify(Array.from(this.favorites)));
+    localStorage.setItem(
+      AppState.STORAGE_KEYS.FAVORITES,
+      JSON.stringify(Array.from(this.favorites)),
+    );
   }
 
   #saveFoodlog() {
-    localStorage.setItem(AppState.STORAGE_KEYS.FOODLOG, JSON.stringify(this.foodlog));
+    localStorage.setItem(
+      AppState.STORAGE_KEYS.FOODLOG,
+      JSON.stringify(this.foodlog),
+    );
   }
 
   toggleFavorite(mealId) {
@@ -113,7 +123,7 @@ export class AppState {
         carbs: totals.carbs + (e.carbs || 0),
         fat: totals.fat + (e.fat || 0),
       }),
-      { calories: 0, protein: 0, carbs: 0, fat: 0 }
+      { calories: 0, protein: 0, carbs: 0, fat: 0 },
     );
   }
 

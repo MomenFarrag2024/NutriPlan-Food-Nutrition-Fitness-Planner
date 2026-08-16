@@ -12,7 +12,12 @@ export class OpenFoodFactsApi {
    * Nutri-Score grade.
    * @param {{query?: string, category?: string, grade?: string, pageSize?: number}} opts
    */
-  async searchProducts({ query = "", category = "", grade = "", pageSize = 24 } = {}) {
+  async searchProducts({
+    query = "",
+    category = "",
+    grade = "",
+    pageSize = 24,
+  } = {}) {
     const params = new URLSearchParams({
       search_simple: "1",
       action: "process",
@@ -32,7 +37,9 @@ export class OpenFoodFactsApi {
       params.set("nutrition_grades_tags", grade.toLowerCase());
     }
 
-    const res = await fetch(`${OpenFoodFactsApi.SEARCH_URL}?${params.toString()}`);
+    const res = await fetch(
+      `${OpenFoodFactsApi.SEARCH_URL}?${params.toString()}`,
+    );
     if (!res.ok) throw new Error(`OpenFoodFacts search failed: ${res.status}`);
     const data = await res.json();
     return (data.products || []).filter((p) => p.product_name);
@@ -40,7 +47,9 @@ export class OpenFoodFactsApi {
 
   /** Look up a single product by its barcode. Returns null if not found. */
   async getProductByBarcode(barcode) {
-    const res = await fetch(`${OpenFoodFactsApi.PRODUCT_URL}/${encodeURIComponent(barcode)}.json`);
+    const res = await fetch(
+      `${OpenFoodFactsApi.PRODUCT_URL}/${encodeURIComponent(barcode)}.json`,
+    );
     if (!res.ok) throw new Error(`OpenFoodFacts lookup failed: ${res.status}`);
     const data = await res.json();
     if (data.status !== 1 || !data.product) return null;
@@ -52,17 +61,33 @@ export class OpenFoodFactsApi {
     const n = product.nutriments || {};
     return {
       barcode: product.code || product._id || "",
-      name: product.product_name || product.product_name_en || "Unnamed product",
+      name:
+        product.product_name || product.product_name_en || "Unnamed product",
       brand: (product.brands || "").split(",")[0].trim() || "Unknown brand",
-      image: product.image_front_small_url || product.image_url || product.image_small_url || "",
-      nutriScore: (product.nutrition_grades || product.nutriscore_grade || "").toLowerCase(),
+      image:
+        product.image_front_small_url ||
+        product.image_url ||
+        product.image_small_url ||
+        "",
+      nutriScore: (
+        product.nutrition_grades ||
+        product.nutriscore_grade ||
+        ""
+      ).toLowerCase(),
       novaGroup: product.nova_group || null,
       quantity: product.quantity || "",
-      caloriesPer100g: Math.round(n["energy-kcal_100g"] ?? n["energy-kcal"] ?? 0),
+      caloriesPer100g: Math.round(
+        n["energy-kcal_100g"] ?? n["energy-kcal"] ?? 0,
+      ),
       proteinPer100g: this.#round1(n.proteins_100g),
       carbsPer100g: this.#round1(n.carbohydrates_100g),
       fatPer100g: this.#round1(n.fat_100g),
       sugarPer100g: this.#round1(n.sugars_100g),
+      saturatedFatPer100g: this.#round1(n["saturated-fat_100g"]),
+      fiberPer100g: this.#round1(n.fiber_100g),
+      saltPer100g: this.#round1(n.salt_100g),
+      ingredients:
+        product.ingredients_text || product.ingredients_text_en || "",
     };
   }
 

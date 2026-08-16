@@ -15,12 +15,27 @@ import {
   getTodayTotals,
   getWeeklyCalories,
 } from "./state.js";
-import { debounce, toast, formatToday, estimateNutrition, clampPercent } from "./utils.js";
+import {
+  debounce,
+  toast,
+  formatToday,
+  estimateNutrition,
+  clampPercent,
+} from "./utils.js";
 
 const PAGE_META = {
-  meals: { title: "Meals & Recipes", subtitle: "Discover delicious and nutritious recipes tailored for you" },
-  products: { title: "Product Scanner", subtitle: "Search packaged foods or scan a barcode for nutrition info" },
-  foodlog: { title: "Food Log", subtitle: "Track and monitor your daily nutrition intake" },
+  meals: {
+    title: "Meals & Recipes",
+    subtitle: "Discover delicious and nutritious recipes tailored for you",
+  },
+  products: {
+    title: "Product Scanner",
+    subtitle: "Search packaged foods or scan a barcode for nutrition info",
+  },
+  foodlog: {
+    title: "Food Log",
+    subtitle: "Track and monitor your daily nutrition intake",
+  },
 };
 
 function getPageFromURL() {
@@ -86,8 +101,12 @@ export class App {
       lookupBarcodeBtn: document.getElementById("lookup-barcode-btn"),
       productsGrid: document.getElementById("products-grid"),
       productsCount: document.getElementById("products-count"),
-      nutriScoreFilters: Array.from(document.querySelectorAll(".nutri-score-filter")),
-      productCategoryBtns: Array.from(document.querySelectorAll(".product-category-btn")),
+      nutriScoreFilters: Array.from(
+        document.querySelectorAll(".nutri-score-filter"),
+      ),
+      productCategoryBtns: Array.from(
+        document.querySelectorAll(".product-category-btn"),
+      ),
 
       // Food log page
       foodlogSection: document.getElementById("foodlog-section"),
@@ -101,7 +120,11 @@ export class App {
   }
 
   MEAL_EMPTY_STATE() {
-    return ui.emptyStateHTML("No recipes found", "Try searching for something else", "fa-search");
+    return ui.emptyStateHTML(
+      "No recipes found",
+      "Try searching for something else",
+      "fa-search",
+    );
   }
 
   // ---------------------------------------------------------------------------
@@ -122,7 +145,9 @@ export class App {
       await Promise.all([this.loadCategories(), this.loadInitialRecipes()]);
     } catch (err) {
       console.error(err);
-      this.el.recipesGrid.innerHTML = ui.errorStateHTML("Couldn't load recipes right now.");
+      this.el.recipesGrid.innerHTML = ui.errorStateHTML(
+        "Couldn't load recipes right now.",
+      );
     } finally {
       this.hideLoadingOverlay();
     }
@@ -147,18 +172,23 @@ export class App {
         e.preventDefault();
         this.switchPage(page);
         const path = page === "meals" ? "/home" : `/${page}`;
-        window.history.pushState(
-          { page },
-          "",
-          path
-        );
+        window.history.pushState({ page }, "", path);
         this.closeMobileSidebar();
       });
     });
 
-    this.el.headerMenuBtn?.addEventListener("click", this.openMobileSidebar.bind(this));
-    this.el.sidebarCloseBtn?.addEventListener("click", this.closeMobileSidebar.bind(this));
-    this.el.sidebarOverlay?.addEventListener("click", this.closeMobileSidebar.bind(this));
+    this.el.headerMenuBtn?.addEventListener(
+      "click",
+      this.openMobileSidebar.bind(this),
+    );
+    this.el.sidebarCloseBtn?.addEventListener(
+      "click",
+      this.closeMobileSidebar.bind(this),
+    );
+    this.el.sidebarOverlay?.addEventListener(
+      "click",
+      this.closeMobileSidebar.bind(this),
+    );
 
     // Back / Forward browser buttons
     window.addEventListener("popstate", () => {
@@ -195,19 +225,27 @@ export class App {
   }
 
   hideAllPagesExcept(page) {
-    const mealsSections = [this.el.searchFiltersSection, this.el.categoriesSection, this.el.recipesSection];
-    mealsSections.forEach((s) => (s.style.display = page === "meals" ? "" : "none"));
+    const mealsSections = [
+      this.el.searchFiltersSection,
+      this.el.categoriesSection,
+      this.el.recipesSection,
+    ];
+    mealsSections.forEach(
+      (s) => (s.style.display = page === "meals" ? "" : "none"),
+    );
     this.el.mealDetailsSection.style.display = "none"; // only shown explicitly via openMealDetail
     this.el.productsSection.style.display = page === "products" ? "" : "none";
     this.el.foodlogSection.style.display = page === "foodlog" ? "" : "none";
   }
-  // ---------------------------------------------------------------------------
 
   // ---------------------------------------------------------------------------
   // Meals page
   // ---------------------------------------------------------------------------
   setupMealsPage() {
-    this.el.searchInput.addEventListener("input", debounce(this.handleSearch.bind(this), 400));
+    this.el.searchInput.addEventListener(
+      "input",
+      debounce(this.handleSearch.bind(this), 400),
+    );
 
     this.el.areaFilters.addEventListener("click", (e) => {
       const btn = e.target.closest(".area-filter-btn");
@@ -238,19 +276,33 @@ export class App {
       this.loadRecipesByCategory(category);
     });
 
-    this.el.gridViewBtn.addEventListener("click", () => this.setViewMode("grid"));
-    this.el.listViewBtn.addEventListener("click", () => this.setViewMode("list"));
-
-    this.el.recipesGrid.addEventListener("click", this.handleRecipeGridClick.bind(this));
-    this.el.backToMealsBtn.addEventListener("click", this.closeMealDetail.bind(this));
-    this.el.logMealBtn.addEventListener("click", this.handleLogMealClick.bind(this));
+    this.el.gridViewBtn.addEventListener("click", () =>
+      this.setViewMode("grid"),
+    );
+    this.el.listViewBtn.addEventListener("click", () =>
+      this.setViewMode("list"),
+    );
+    this.el.recipesGrid.addEventListener(
+      "click",
+      this.handleRecipeGridClick.bind(this),
+    );
+    this.el.backToMealsBtn.addEventListener(
+      "click",
+      this.closeMealDetail.bind(this),
+    );
+    this.el.logMealBtn.addEventListener(
+      "click",
+      this.handleLogMealClick.bind(this),
+    );
   }
 
   async loadCategories() {
     this.el.categoriesGrid.innerHTML = ui.skeletonGridHTML(6);
     const categories = await mealdb.fetchCategories();
     state.categories = categories;
-    this.el.categoriesGrid.innerHTML = categories.map(ui.categoryCardHTML).join("") || ui.emptyStateHTML("No categories available");
+    this.el.categoriesGrid.innerHTML =
+      categories.map(ui.categoryCardHTML).join("") ||
+      ui.emptyStateHTML("No categories available");
   }
 
   async loadInitialRecipes() {
@@ -265,23 +317,52 @@ export class App {
     try {
       this.el.recipesGrid.innerHTML = ui.skeletonGridHTML(8);
       const meals = await mealdb.filterByCategory(category);
-      state.visibleMeals = meals;
-      this.renderRecipes(meals, `Showing ${meals.length} ${category} recipes`);
+      const mealsWithCategory = meals.map((meal) => ({
+        ...meal,
+        strCategory: category,
+      }));
+      state.visibleMeals = mealsWithCategory;
+      this.renderRecipes(
+        mealsWithCategory,
+        `Showing ${mealsWithCategory.length} ${category} recipes`,
+      );
     } catch (err) {
       console.error(err);
-      this.el.recipesGrid.innerHTML = ui.errorStateHTML("Couldn't load that category.");
+      this.el.recipesGrid.innerHTML = ui.errorStateHTML(
+        "Couldn't load that category.",
+      );
     }
   }
 
   async loadRecipesByArea(area) {
     try {
       this.el.recipesGrid.innerHTML = ui.skeletonGridHTML(8);
+
       const meals = await mealdb.filterByArea(area);
-      state.visibleMeals = meals;
-      this.renderRecipes(meals, `Showing ${meals.length} ${area} recipes`);
+
+      const mealsWithDetails = await Promise.all(
+        meals.map(async (meal) => {
+          const details = await mealdb.getMealById(meal.idMeal);
+
+          return {
+            ...meal,
+            strArea: area,
+            strCategory: details?.strCategory || "",
+          };
+        }),
+      );
+
+      state.visibleMeals = mealsWithDetails;
+
+      this.renderRecipes(
+        mealsWithDetails,
+        `Showing ${mealsWithDetails.length} ${area} recipes`,
+      );
     } catch (err) {
       console.error(err);
-      this.el.recipesGrid.innerHTML = ui.errorStateHTML("Couldn't load that cuisine.");
+      this.el.recipesGrid.innerHTML = ui.errorStateHTML(
+        "Couldn't load that cuisine.",
+      );
     }
   }
 
@@ -291,8 +372,9 @@ export class App {
     state.activeCategory = "";
     state.activeArea = "";
     this.setActiveCategoryCard(null);
-    this.setActiveAreaButton(this.el.areaFilters.querySelector('[data-area=""]'));
-
+    this.setActiveAreaButton(
+      this.el.areaFilters.querySelector('[data-area=""]'),
+    );
     if (!query) {
       this.renderRecipes(state.allMeals);
       return;
@@ -302,17 +384,26 @@ export class App {
       this.el.recipesGrid.innerHTML = ui.skeletonGridHTML(8);
       const meals = await mealdb.searchMealsByName(query);
       state.visibleMeals = meals;
-      this.renderRecipes(meals, `Showing ${meals.length} results for "${query}"`);
+      this.renderRecipes(
+        meals,
+        `Showing ${meals.length} results for "${query}"`,
+      );
     } catch (err) {
       console.error(err);
-      this.el.recipesGrid.innerHTML = ui.errorStateHTML("Search failed. Please try again.");
+      this.el.recipesGrid.innerHTML = ui.errorStateHTML(
+        "Search failed. Please try again.",
+      );
     }
   }
 
   renderRecipes(meals, countLabel) {
-    const render = state.viewMode === "list" ? ui.recipeListRowHTML : ui.recipeCardHTML;
-    this.el.recipesGrid.innerHTML = meals.length ? meals.map(render).join("") : this.MEAL_EMPTY_STATE();
-    this.el.recipesCount.textContent = countLabel || `Showing ${meals.length} recipes`;
+    const render =
+      state.viewMode === "list" ? ui.recipeListRowHTML : ui.recipeCardHTML;
+    this.el.recipesGrid.innerHTML = meals.length
+      ? meals.map(render).join("")
+      : this.MEAL_EMPTY_STATE();
+    this.el.recipesCount.textContent =
+      countLabel || `Showing ${meals.length} recipes`;
   }
 
   setViewMode(mode) {
@@ -323,19 +414,29 @@ export class App {
 
     this.el.gridViewBtn.classList.toggle("bg-white", isGrid);
     this.el.gridViewBtn.classList.toggle("shadow-sm", isGrid);
-    this.el.gridViewBtn.querySelector("i").classList.toggle("text-gray-700", isGrid);
-    this.el.gridViewBtn.querySelector("i").classList.toggle("text-gray-500", !isGrid);
+    this.el.gridViewBtn
+      .querySelector("i")
+      .classList.toggle("text-gray-700", isGrid);
+    this.el.gridViewBtn
+      .querySelector("i")
+      .classList.toggle("text-gray-500", !isGrid);
 
     this.el.listViewBtn.classList.toggle("bg-white", !isGrid);
     this.el.listViewBtn.classList.toggle("shadow-sm", !isGrid);
-    this.el.listViewBtn.querySelector("i").classList.toggle("text-gray-700", !isGrid);
-    this.el.listViewBtn.querySelector("i").classList.toggle("text-gray-500", isGrid);
+    this.el.listViewBtn
+      .querySelector("i")
+      .classList.toggle("text-gray-700", !isGrid);
+    this.el.listViewBtn
+      .querySelector("i")
+      .classList.toggle("text-gray-500", isGrid);
 
     this.renderRecipes(state.visibleMeals, this.el.recipesCount.textContent);
   }
 
   setActiveCategoryCard(card) {
-    this.el.categoriesGrid.querySelectorAll(".category-card").forEach((c) => c.classList.remove("ring-emerald-500"));
+    this.el.categoriesGrid
+      .querySelectorAll(".category-card")
+      .forEach((c) => c.classList.remove("ring-emerald-500"));
     card?.classList.add("ring-emerald-500");
   }
 
@@ -358,81 +459,169 @@ export class App {
       const icon = saveBtn.querySelector("i");
       icon.classList.toggle("text-red-500", favorited);
       icon.classList.toggle("text-gray-300", !favorited);
-      toast(favorited ? "Added to favorites" : "Removed from favorites", "success");
+      toast(
+        favorited ? "Added to favorites" : "Removed from favorites",
+        "success",
+      );
       return;
     }
     const card = e.target.closest(".recipe-card");
     if (card) this.openMealDetail(card.dataset.mealId);
   }
 
-  async openMealDetail(mealId) {
-    try {
-      const meal = await mealdb.getMealById(mealId);
-      if (!meal) {
-        toast("Recipe not found", "error");
-        return;
-      }
-      state.currentMeal = meal;
-      this.renderMealDetail(meal);
-      this.hideAllPagesExcept("__detail__"); // hides meals list sections + products/foodlog
-      this.el.mealDetailsSection.style.display = "";
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (err) {
-      console.error(err);
-      toast("Couldn't load that recipe", "error");
+async openMealDetail(mealId) {
+  try {
+    const meal = await mealdb.getMealById(mealId);
+
+    if (!meal) {
+      toast("Recipe not found", "error");
+      return;
     }
+
+    state.currentMeal = meal;
+
+    // Show details page first
+    this.hideAllPagesExcept("__detail__");
+    this.el.mealDetailsSection.style.display = "";
+
+    // Render recipe + nutrition
+    this.renderMealDetail(meal);
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+
+  } catch (err) {
+    console.error(err);
+    toast("Couldn't load that recipe", "error");
   }
+}
 
   closeMealDetail() {
     this.hideAllPagesExcept("meals");
   }
 
-  renderMealDetail(meal) {
-    const ingredients = mealdb.extractIngredients(meal);
-    const steps = mealdb.extractInstructionSteps(meal);
-    const nutrition = estimateNutrition(ingredients.length);
-    const servings = 4;
-    this.el.heroImage.src = meal.strMealThumb;
-    this.el.heroImage.alt = meal.strMeal;
-    this.el.heroTitle.textContent = meal.strMeal;
-    this.el.heroBadges.innerHTML = [meal.strCategory, meal.strArea]
-      .filter(Boolean)
-      .map(
-        (label, i) =>
-          `<span class="px-3 py-1 ${i === 0 ? "bg-emerald-500" : "bg-blue-500"} text-white text-sm font-semibold rounded-full">${label}</span>`
-      )
-      .join("");
-    this.el.heroServings.textContent = `${servings} servings`;
-    this.el.heroCalories.textContent = `~${nutrition.calories} cal/serving`;
-    this.el.ingredientsCount.textContent = `${ingredients.length} items`;
-    this.el.ingredientsList.innerHTML = ingredients.map(ui.ingredientRowHTML).join("");
-    this.el.instructionsList.innerHTML = steps.length
-      ? steps.map(ui.instructionStepHTML).join("")
-      : `<p class="text-gray-500">No instructions provided for this recipe.</p>`;
-    if (meal.strYoutube) {
-      this.el.videoSection.style.display = "";
-      const videoId = new URL(meal.strYoutube).searchParams.get("v");
-      this.el.videoIframe.src = videoId ? `https://www.youtube.com/embed/${videoId}` : "";
-    } else {
-      this.el.videoSection.style.display = "none";
-    }
-    this.updateNutritionFacts(nutrition, servings);
-    this.el.logMealBtn.dataset.mealId = meal.idMeal;
+renderMealDetail(meal) {
+  const ingredients = mealdb.extractIngredients(meal);
+  const steps = mealdb.extractInstructionSteps(meal);
+  const servings = 4;
+
+  // --------------------------------------------------
+  // Log Meal Button - Loading State
+  // --------------------------------------------------
+  this.el.logMealBtn.disabled = true;
+  this.el.logMealBtn.className =
+    "flex items-center gap-2 px-6 py-3 bg-gray-300 text-gray-500 rounded-xl font-semibold cursor-not-allowed transition-all";
+  this.el.logMealBtn.title = "Waiting for nutrition data...";
+  this.el.logMealBtn.innerHTML = `
+    <i class="fa-solid fa-spinner fa-spin"></i>
+    <span>Calculating...</span>
+  `;
+
+  // --------------------------------------------------
+  // Recipe Details
+  // --------------------------------------------------
+  this.el.heroImage.src = meal.strMealThumb;
+  this.el.heroImage.alt = meal.strMeal;
+
+  this.el.heroTitle.textContent = meal.strMeal;
+
+  this.el.heroBadges.innerHTML = [meal.strCategory, meal.strArea]
+    .filter(Boolean)
+    .map(
+      (label, i) =>
+        `<span class="px-3 py-1 ${
+          i === 0 ? "bg-emerald-500" : "bg-blue-500"
+        } text-white text-sm font-semibold rounded-full">${label}</span>`,
+    )
+    .join("");
+
+  this.el.heroServings.textContent = `${servings} servings`;
+
+  this.el.ingredientsCount.textContent = `${ingredients.length} items`;
+
+  this.el.ingredientsList.innerHTML = ingredients
+    .map(ui.ingredientRowHTML)
+    .join("");
+
+  this.el.instructionsList.innerHTML = steps.length
+    ? steps.map(ui.instructionStepHTML).join("")
+    : `<p class="text-gray-500">
+        No instructions provided for this recipe.
+      </p>`;
+
+  // --------------------------------------------------
+  // YouTube
+  // --------------------------------------------------
+  if (meal.strYoutube) {
+    this.el.videoSection.style.display = "";
+
+    const videoId = new URL(meal.strYoutube).searchParams.get("v");
+
+    this.el.videoIframe.src = videoId
+      ? `https://www.youtube.com/embed/${videoId}`
+      : "";
+  } else {
+    this.el.videoSection.style.display = "none";
   }
+
+  // --------------------------------------------------
+  // Nutrition Calculation
+  // --------------------------------------------------
+  const nutrition = estimateNutrition(ingredients.length);
+
+  this.el.heroCalories.textContent =
+    `~${nutrition.calories} cal/serving`;
+
+  this.updateNutritionFacts(nutrition, servings);
+
+  // --------------------------------------------------
+  // Log Meal Button - Ready State
+  // --------------------------------------------------
+  this.el.logMealBtn.dataset.mealId = meal.idMeal;
+
+  this.el.logMealBtn.disabled = false;
+
+  this.el.logMealBtn.className =
+    "flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all";
+
+  this.el.logMealBtn.title = "";
+
+  this.el.logMealBtn.innerHTML = `
+    <i class="fa-solid fa-clipboard-list"></i>
+    <span>Log This Meal</span>
+  `;
+}
 
   updateNutritionFacts(nutrition, servings) {
     document.getElementById("nutri-calories").textContent = nutrition.calories;
-    document.getElementById("nutri-total-calories").textContent = `Total: ${nutrition.calories * servings} cal`;
-    document.getElementById("nutri-protein").textContent = `${nutrition.protein}g`;
+    document.getElementById("nutri-total-calories").textContent =
+      `Total: ${nutrition.calories * servings} cal`;
+    document.getElementById("nutri-protein").textContent =
+      `${nutrition.protein}g`;
     document.getElementById("nutri-carbs").textContent = `${nutrition.carbs}g`;
     document.getElementById("nutri-fat").textContent = `${nutrition.fat}g`;
     document.getElementById("nutri-fiber").textContent = `${nutrition.fiber}g`;
     document.getElementById("nutri-sugar").textContent = `${nutrition.sugar}g`;
-    document.getElementById("nutri-protein-bar").style.width = `${clampPercent(nutrition.protein, 50)}%`;
-    document.getElementById("nutri-carbs-bar").style.width = `${clampPercent(nutrition.carbs, 250)}%`;
-    document.getElementById("nutri-fat-bar").style.width = `${clampPercent(nutrition.fat, 65)}%`;
-    document.getElementById("nutri-fiber-bar").style.width = `${clampPercent(nutrition.fiber, 30)}%`;
-    document.getElementById("nutri-sugar-bar").style.width = `${clampPercent(nutrition.sugar, 50)}%`;
+    document.getElementById("nutri-saturated-fat").textContent =
+      `${nutrition.saturatedFat * servings}g`;
+    document.getElementById("nutri-cholesterol").textContent =
+      `${nutrition.cholesterol}mg`;
+    document.getElementById("nutri-sodium").textContent =
+      `${nutrition.sodium}mg`;
+    document.getElementById("nutri-protein-bar").style.width =
+      `${clampPercent(nutrition.protein, 50)}%`;
+    document.getElementById("nutri-carbs-bar").style.width =
+      `${clampPercent(nutrition.carbs, 250)}%`;
+    document.getElementById("nutri-fat-bar").style.width =
+      `${clampPercent(nutrition.fat, 65)}%`;
+    document.getElementById("nutri-fiber-bar").style.width =
+      `${clampPercent(nutrition.fiber, 30)}%`;
+    document.getElementById("nutri-sugar-bar").style.width =
+      `${clampPercent(nutrition.sugar, 50)}%`;
+    document.getElementById("nutri-saturated-fat-bar").style.width =
+      `${clampPercent(nutrition.saturatedFat, 50)}%`;
   }
 
   handleLogMealClick() {
@@ -578,8 +767,9 @@ export class App {
         servings = 10;
         servingsInput.value = 10;
       }
-      document.getElementById("modal-calories").textContent =
-        Math.round(nutrition.calories * servings);
+      document.getElementById("modal-calories").textContent = Math.round(
+        nutrition.calories * servings,
+      );
       document.getElementById("modal-protein").textContent =
         `${Math.round(nutrition.protein * servings)}g`;
       document.getElementById("modal-carbs").textContent =
@@ -618,6 +808,7 @@ export class App {
         protein: nutrition.protein * servings,
         carbs: nutrition.carbs * servings,
         fat: nutrition.fat * servings,
+        saturatedFat: nutrition.saturatedFat * servings,
       });
       modal.remove();
       window.Swal.fire({
@@ -644,11 +835,17 @@ export class App {
   // Product scanner page
   // ---------------------------------------------------------------------------
   setupProductsPage() {
-    this.el.searchProductBtn.addEventListener("click", this.handleProductSearch.bind(this));
+    this.el.searchProductBtn.addEventListener(
+      "click",
+      this.handleProductSearch.bind(this),
+    );
     this.el.productSearchInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") this.handleProductSearch();
     });
-    this.el.lookupBarcodeBtn.addEventListener("click", this.handleBarcodeLookup.bind(this));
+    this.el.lookupBarcodeBtn.addEventListener(
+      "click",
+      this.handleBarcodeLookup.bind(this),
+    );
     this.el.barcodeInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") this.handleBarcodeLookup();
     });
@@ -657,7 +854,7 @@ export class App {
         state.productGrade = btn.dataset.grade;
         this.setActiveNutriFilter(btn);
         this.handleProductSearch();
-      })
+      }),
     );
     this.el.productCategoryBtns.forEach((btn) =>
       btn.addEventListener("click", () => {
@@ -665,7 +862,7 @@ export class App {
         state.productQuery = "";
         this.el.productSearchInput.value = "";
         this.handleProductSearch();
-      })
+      }),
     );
     this.el.productsGrid.addEventListener("click", (e) => {
       const card = e.target.closest(".product-card");
@@ -674,7 +871,9 @@ export class App {
   }
 
   setActiveNutriFilter(activeBtn) {
-    this.el.nutriScoreFilters.forEach((btn) => btn.classList.remove("ring-gray-900"));
+    this.el.nutriScoreFilters.forEach((btn) =>
+      btn.classList.remove("ring-gray-900"),
+    );
     activeBtn.classList.add("ring-gray-900");
   }
 
@@ -699,7 +898,7 @@ export class App {
     } catch (err) {
       console.error("PRODUCT SEARCH ERROR:", err);
       this.el.productsGrid.innerHTML = ui.errorStateHTML(
-        "Product search failed."
+        "Product search failed.",
       );
     }
   }
@@ -711,7 +910,11 @@ export class App {
       this.el.productsGrid.innerHTML = ui.skeletonGridHTML(4);
       const raw = await off.getProductByBarcode(barcode);
       if (!raw) {
-        this.el.productsGrid.innerHTML = ui.emptyStateHTML("No product found", `No match for barcode ${barcode}`, "fa-barcode");
+        this.el.productsGrid.innerHTML = ui.emptyStateHTML(
+          "No product found",
+          `No match for barcode ${barcode}`,
+          "fa-barcode",
+        );
         this.el.productsCount.textContent = "0 results";
         return;
       }
@@ -720,41 +923,121 @@ export class App {
       this.renderProducts([product]);
     } catch (err) {
       console.error(err);
-      this.el.productsGrid.innerHTML = ui.errorStateHTML("Barcode lookup failed.");
+      this.el.productsGrid.innerHTML = ui.errorStateHTML(
+        "Barcode lookup failed.",
+      );
     }
   }
 
   renderProducts(products) {
     this.el.productsGrid.innerHTML = products.length
       ? products.map(ui.productCardHTML).join("")
-      : ui.emptyStateHTML("No products found", "Try a different search or filter", "fa-box-open");
+      : ui.emptyStateHTML(
+          "No products found",
+          "Try a different search or filter",
+          "fa-box-open",
+        );
     this.el.productsCount.textContent = `${products.length} result${products.length === 1 ? "" : "s"}`;
   }
 
   openProductDetail(barcode) {
     const product = state.products.find((p) => p.barcode === barcode);
     if (!product) return;
+    // Remove old modal if exists
+    document.getElementById("product-detail-modal")?.remove();
+    // Add Product Details Modal
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      ui.productDetailModalHTML(product),
+    );
+    const modal = document.getElementById("product-detail-modal");
+    // Close buttons
+    modal.querySelectorAll(".close-product-modal").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        modal.remove();
+      });
+    });
+    // Close by clicking outside
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.remove();
+      }
+    });
+    // Log This Food
+    const logBtn = modal.querySelector(".add-product-to-log");
+    logBtn?.addEventListener("click", () => {
+      addFoodLogEntry({
+        name: product.name,
+        source: "product",
+        mealType: "snack",
+        image: product.image || "",
+        servings: 1,
+        calories: product.caloriesPer100g || 0,
+        protein: product.proteinPer100g || 0,
+        carbs: product.carbsPer100g || 0,
+        fat: product.fatPer100g || 0,
+      });
+      modal.remove();
+      window.Swal.fire({
+        position: "center",
+        icon: "success",
+        title: "Product Logged!",
+        html: `
+        <p>
+          <strong>${escapeHtml(product.name)}</strong>
+          has been added to your daily log.
+        </p>
+        <p class="mt-2 font-bold text-emerald-600">
+          +${Math.round(product.caloriesPer100g || 0)} calories
+        </p>
+      `,
+        showConfirmButton: false,
+        timer: 2000,
+      });
+    });
+  }
+
+  openProductLogModal(product) {
     let servings = 1;
+
     const modal = document.createElement("div");
+
     modal.id = "log-product-modal";
+
     modal.className =
-      "fixed inset-0 z-50 bg-black/50 flex items-center justify-center";
+      "fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4";
+
     modal.innerHTML = `
     <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
-      <!-- Product Header -->
+
+      <!-- Header -->
       <div class="flex items-center gap-4 mb-6">
-        <img
-          src="${escapeHtml(product.image || "")}"
-          alt="${escapeHtml(product.name)}"
-          class="w-16 h-16 rounded-xl object-cover"
-        />
+
+        ${
+          product.image
+            ? `
+              <img
+                src="${escapeHtml(product.image)}"
+                alt="${escapeHtml(product.name)}"
+                class="w-16 h-16 rounded-xl object-cover"
+              />
+            `
+            : `
+              <div class="w-16 h-16 rounded-xl bg-gray-100 flex items-center justify-center">
+                <i class="fa-solid fa-box-open text-gray-300 text-2xl"></i>
+              </div>
+            `
+        }
+
         <div>
           <h3 class="text-xl font-bold text-gray-900">
             Log This Product
           </h3>
+
           <p class="text-gray-500 text-sm">
             ${escapeHtml(product.name)}
           </p>
+
           ${
             product.brand
               ? `
@@ -765,19 +1048,25 @@ export class App {
               : ""
           }
         </div>
+
       </div>
+
       <!-- Servings -->
       <div class="mb-6">
+
         <label class="block text-sm font-semibold text-gray-700 mb-2">
           Number of Servings
         </label>
+
         <div class="flex items-center gap-3">
+
           <button
             id="decrease-product-servings"
             class="w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
           >
             <i class="fa-solid fa-minus text-gray-600"></i>
           </button>
+
           <input
             type="number"
             id="product-servings"
@@ -787,20 +1076,26 @@ export class App {
             step="0.5"
             class="w-20 text-center text-xl font-bold border-2 border-gray-200 rounded-lg py-2"
           />
+
           <button
             id="increase-product-servings"
             class="w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
           >
             <i class="fa-solid fa-plus text-gray-600"></i>
           </button>
+
         </div>
       </div>
+
       <!-- Nutrition -->
       <div class="bg-emerald-50 rounded-xl p-4 mb-6">
+
         <p class="text-sm text-gray-600 mb-2">
           Estimated nutrition per serving:
         </p>
+
         <div class="grid grid-cols-4 gap-2 text-center">
+
           <div>
             <p
               id="product-modal-calories"
@@ -808,10 +1103,12 @@ export class App {
             >
               ${Math.round(product.caloriesPer100g || 0)}
             </p>
+
             <p class="text-xs text-gray-500">
               Calories
             </p>
           </div>
+
           <div>
             <p
               id="product-modal-protein"
@@ -819,10 +1116,12 @@ export class App {
             >
               ${Math.round(product.proteinPer100g || 0)}g
             </p>
+
             <p class="text-xs text-gray-500">
               Protein
             </p>
           </div>
+
           <div>
             <p
               id="product-modal-carbs"
@@ -830,10 +1129,12 @@ export class App {
             >
               ${Math.round(product.carbsPer100g || 0)}g
             </p>
+
             <p class="text-xs text-gray-500">
               Carbs
             </p>
           </div>
+
           <div>
             <p
               id="product-modal-fat"
@@ -841,28 +1142,35 @@ export class App {
             >
               ${Math.round(product.fatPer100g || 0)}g
             </p>
+
             <p class="text-xs text-gray-500">
               Fat
             </p>
           </div>
+
         </div>
       </div>
+
       <!-- Actions -->
       <div class="flex gap-3">
+
         <button
           id="cancel-log-product"
           class="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all"
         >
           Cancel
         </button>
+
         <button
           id="confirm-log-product"
-          class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all"
+          class="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-all"
         >
           <i class="fa-solid fa-clipboard-list mr-2"></i>
           Log Product
         </button>
+
       </div>
+
     </div>
   `;
 
@@ -874,7 +1182,11 @@ export class App {
     const cancelBtn = modal.querySelector("#cancel-log-product");
     const confirmBtn = modal.querySelector("#confirm-log-product");
 
-    function updateProductNutrition() {
+    // --------------------------------------------------
+    // Update nutrition based on servings
+    // --------------------------------------------------
+
+    const updateProductNutrition = () => {
       let value = Number(servingsInput.value);
 
       if (!value || value < 0.5) {
@@ -886,20 +1198,29 @@ export class App {
       }
 
       servings = value;
+
       servingsInput.value = value;
 
-      modal.querySelector("#product-modal-calories").textContent =
-        Math.round((product.caloriesPer100g || 0) * servings);
+      modal.querySelector("#product-modal-calories").textContent = Math.round(
+        (product.caloriesPer100g || 0) * servings,
+      );
 
-      modal.querySelector("#product-modal-protein").textContent =
-        `${Math.round((product.proteinPer100g || 0) * servings)}g`;
+      modal.querySelector("#product-modal-protein").textContent = `${Math.round(
+        (product.proteinPer100g || 0) * servings,
+      )}g`;
 
-      modal.querySelector("#product-modal-carbs").textContent =
-        `${Math.round((product.carbsPer100g || 0) * servings)}g`;
+      modal.querySelector("#product-modal-carbs").textContent = `${Math.round(
+        (product.carbsPer100g || 0) * servings,
+      )}g`;
 
-      modal.querySelector("#product-modal-fat").textContent =
-        `${Math.round((product.fatPer100g || 0) * servings)}g`;
-    }
+      modal.querySelector("#product-modal-fat").textContent = `${Math.round(
+        (product.fatPer100g || 0) * servings,
+      )}g`;
+    };
+
+    // --------------------------------------------------
+    // Decrease servings
+    // --------------------------------------------------
 
     decreaseBtn.addEventListener("click", () => {
       const value = Number(servingsInput.value);
@@ -909,17 +1230,44 @@ export class App {
         updateProductNutrition();
       }
     });
+
+    // --------------------------------------------------
+    // Increase servings
+    // --------------------------------------------------
+
     increaseBtn.addEventListener("click", () => {
       const value = Number(servingsInput.value);
+
       if (value < 10) {
         servingsInput.value = value + 0.5;
         updateProductNutrition();
       }
     });
+
+    // --------------------------------------------------
+    // Manual input
+    // --------------------------------------------------
+
     servingsInput.addEventListener("input", updateProductNutrition);
+
+    // --------------------------------------------------
+    // Close
+    // --------------------------------------------------
+
     cancelBtn.addEventListener("click", () => {
       modal.remove();
     });
+
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.remove();
+      }
+    });
+
+    // --------------------------------------------------
+    // Confirm
+    // --------------------------------------------------
+
     confirmBtn.addEventListener("click", () => {
       addFoodLogEntry({
         name: product.name,
@@ -927,11 +1275,15 @@ export class App {
         mealType: "snack",
 
         image: product.image || "",
-        servings: servings,
+
+        servings,
 
         calories: (product.caloriesPer100g || 0) * servings,
+
         protein: (product.proteinPer100g || 0) * servings,
+
         carbs: (product.carbsPer100g || 0) * servings,
+
         fat: (product.fatPer100g || 0) * servings,
       });
 
@@ -942,18 +1294,18 @@ export class App {
         icon: "success",
         title: "Product Logged!",
         html: `
-      <p>
-        <strong>${escapeHtml(product.name)}</strong>
-        (${servings} serving${servings === 1 ? "" : "s"})
-        has been added to your daily log.
-      </p>
+        <p>
+          <strong>${escapeHtml(product.name)}</strong>
+          (${servings}
+          serving${servings === 1 ? "" : "s"})
+          has been added to your daily log.
+        </p>
 
-      <p class="mt-2 font-bold text-emerald-600">
-        +${Math.round(
-          (product.caloriesPer100g || 0) * servings
-        )} calories
-      </p>
-    `,
+        <p class="mt-2 font-bold text-emerald-600">
+          +${Math.round((product.caloriesPer100g || 0) * servings)}
+          calories
+        </p>
+      `,
         showConfirmButton: false,
         timer: 2000,
       });
@@ -991,6 +1343,26 @@ export class App {
       if (!btn) return;
       removeFoodLogEntry(btn.dataset.entryId);
       this.renderFoodLogPage();
+      // Toast Notification
+      const notification = document.createElement("div");
+      notification.className =
+        "fixed bottom-4 right-4 bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 toast-notification opacity-0 translate-y-2 transition-all duration-300";
+      notification.textContent = "Item removed from log";
+      document.body.appendChild(notification);
+      // Fade In
+      requestAnimationFrame(() => {
+        notification.classList.remove("opacity-0", "translate-y-2");
+        notification.classList.add("opacity-100", "translate-y-0");
+      });
+      // Fade Out after 2 seconds
+      setTimeout(() => {
+        notification.classList.remove("opacity-100", "translate-y-0");
+        notification.classList.add("opacity-0", "translate-y-2");
+        // Remove after animation
+        setTimeout(() => {
+          notification.remove();
+        }, 2000);
+      }, 2000);
     });
     this.el.quickLogBtns.forEach((btn) =>
       btn.addEventListener("click", () => {
@@ -1002,7 +1374,7 @@ export class App {
         } else if (action === "custom-entry") {
           this.openCustomEntryDialog();
         }
-      })
+      }),
     );
   }
 
@@ -1023,7 +1395,8 @@ export class App {
       showCancelButton: true,
       preConfirm: () => {
         const name = document.getElementById("swal-food-name").value.trim();
-        const calories = Number(document.getElementById("swal-food-cal").value) || 0;
+        const calories =
+          Number(document.getElementById("swal-food-cal").value) || 0;
         if (!name || !calories) {
           window.Swal.showValidationMessage("Name and calories are required");
           return false;
@@ -1031,14 +1404,19 @@ export class App {
         return {
           name,
           calories,
-          protein: Number(document.getElementById("swal-food-protein").value) || 0,
+          protein:
+            Number(document.getElementById("swal-food-protein").value) || 0,
           carbs: Number(document.getElementById("swal-food-carbs").value) || 0,
           fat: Number(document.getElementById("swal-food-fat").value) || 0,
         };
       },
     }).then((result) => {
       if (result.isConfirmed && result.value) {
-        addFoodLogEntry({ ...result.value, source: "custom", mealType: "snack" });
+        addFoodLogEntry({
+          ...result.value,
+          source: "custom",
+          mealType: "snack",
+        });
         this.renderFoodLogPage();
         toast(`Logged "${result.value.name}"`, "success");
       }
@@ -1054,7 +1432,12 @@ export class App {
 
     const totals = getTodayTotals();
 
-    this.updateProgress("calories", totals.calories, state.goals.calories, " kcal");
+    this.updateProgress(
+      "calories",
+      totals.calories,
+      state.goals.calories,
+      " kcal",
+    );
     this.updateProgress("protein", totals.protein, state.goals.protein, " g");
     this.updateProgress("carbs", totals.carbs, state.goals.carbs, " g");
     this.updateProgress("fat", totals.fat, state.goals.fat, " g");
@@ -1081,24 +1464,16 @@ export class App {
     const percent = clampPercent(rounded, goal);
 
     // Current value
-    const currentElement = document.getElementById(
-      `progress-${key}-current`
-    );
+    const currentElement = document.getElementById(`progress-${key}-current`);
 
     // Percentage
-    const percentElement = document.getElementById(
-      `progress-${key}-percent`
-    );
+    const percentElement = document.getElementById(`progress-${key}-percent`);
 
     // Goal
-    const labelElement = document.getElementById(
-      `progress-${key}-label`
-    );
+    const labelElement = document.getElementById(`progress-${key}-label`);
 
     // Progress bar
-    const barElement = document.getElementById(
-      `progress-${key}-bar`
-    );
+    const barElement = document.getElementById(`progress-${key}-bar`);
 
     // ------------------------------------------
     // Normal / Danger colors
@@ -1124,40 +1499,28 @@ export class App {
 
     if (isExceeded) {
       // Percentage → Red
-      percentElement?.classList.remove(
-        `text-${normalColor}-600`
-      );
+      percentElement?.classList.remove(`text-${normalColor}-600`);
       percentElement?.classList.add("text-red-500");
 
       // Current value → Red
-      currentElement?.classList.remove(
-        `text-${normalColor}-600`
-      );
+      currentElement?.classList.remove(`text-${normalColor}-600`);
       currentElement?.classList.add("text-red-600");
 
       // Progress bar → Red
-      barElement?.classList.remove(
-        `bg-${normalColor}-500`
-      );
+      barElement?.classList.remove(`bg-${normalColor}-500`);
       barElement?.classList.add("bg-red-500");
     } else {
       // Percentage → Normal
       percentElement?.classList.remove("text-red-500");
-      percentElement?.classList.add(
-        `text-${normalColor}-600`
-      );
+      percentElement?.classList.add(`text-${normalColor}-600`);
 
       // Current value → Normal
       currentElement?.classList.remove("text-red-600");
-      currentElement?.classList.add(
-        `text-${normalColor}-600`
-      );
+      currentElement?.classList.add(`text-${normalColor}-600`);
 
       // Progress bar → Normal
       barElement?.classList.remove("bg-red-500");
-      barElement?.classList.add(
-        `bg-${normalColor}-500`
-      );
+      barElement?.classList.add(`bg-${normalColor}-500`);
     }
 
     // ------------------------------------------
@@ -1201,9 +1564,7 @@ export class App {
 
         return `
         <div
-          class="text-center rounded-xl p-2 ${
-            isToday ? "bg-indigo-100" : ""
-          }"
+          class="text-center rounded-xl p-2 ${isToday ? "bg-indigo-100" : ""}"
         >
           <p class="text-xs text-gray-500 mb-1">
             ${dayName}
@@ -1215,9 +1576,7 @@ export class App {
 
           <div
             class="mt-2 ${
-              day.calories > 0
-                ? "text-emerald-600"
-                : "text-gray-300"
+              day.calories > 0 ? "text-emerald-600" : "text-gray-300"
             }"
           >
             <p class="text-lg font-bold">
@@ -1269,14 +1628,12 @@ export async function searchProducts({
   const res = await fetch(url);
   if (!res.ok) {
     throw new Error(
-      `OpenFoodFacts search failed: ${res.status} ${res.statusText}`
+      `OpenFoodFacts search failed: ${res.status} ${res.statusText}`,
     );
   }
   const data = await res.json();
   console.log("OpenFoodFacts response:", data);
-  return (data.products || []).filter(
-    (product) => product.product_name
-  );
+  return (data.products || []).filter((product) => product.product_name);
 }
 
 // ---------------------------------------------------------------------------

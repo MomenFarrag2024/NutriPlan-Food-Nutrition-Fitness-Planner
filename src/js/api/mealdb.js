@@ -9,7 +9,9 @@ export class MealDbApi {
   async request(path) {
     const res = await fetch(`${MealDbApi.BASE_URL}${path}`);
     if (!res.ok) {
-      throw new Error(`TheMealDB request failed: ${res.status} ${res.statusText}`);
+      throw new Error(
+        `TheMealDB request failed: ${res.status} ${res.statusText}`,
+      );
     }
     return res.json();
   }
@@ -22,7 +24,9 @@ export class MealDbApi {
 
   /** Search meals by name. Returns [] if nothing matches. */
   async searchMealsByName(query) {
-    const data = await this.request(`/search.php?s=${encodeURIComponent(query)}`);
+    const data = await this.request(
+      `/search.php?s=${encodeURIComponent(query)}`,
+    );
     return data.meals || [];
   }
 
@@ -34,13 +38,17 @@ export class MealDbApi {
 
   /** Filter meals by category (e.g. "Seafood"). Returns [] on no match. */
   async filterByCategory(category) {
-    const data = await this.request(`/filter.php?c=${encodeURIComponent(category)}`);
+    const data = await this.request(
+      `/filter.php?c=${encodeURIComponent(category)}`,
+    );
     return data.meals || [];
   }
 
   /** Filter meals by area/cuisine (e.g. "Italian"). Returns [] on no match. */
   async filterByArea(area) {
-    const data = await this.request(`/filter.php?a=${encodeURIComponent(area)}`);
+    const data = await this.request(
+      `/filter.php?a=${encodeURIComponent(area)}`,
+    );
     return data.meals || [];
   }
 
@@ -63,8 +71,17 @@ export class MealDbApi {
       // fall through to the fallback strategy below
     }
 
-    const fallbackCategories = ["Chicken", "Beef", "Seafood", "Dessert", "Vegetarian", "Pasta"];
-    const results = await Promise.allSettled(fallbackCategories.map((c) => this.filterByCategory(c)));
+    const fallbackCategories = [
+      "Chicken",
+      "Beef",
+      "Seafood",
+      "Dessert",
+      "Vegetarian",
+      "Pasta",
+    ];
+    const results = await Promise.allSettled(
+      fallbackCategories.map((c) => this.filterByCategory(c)),
+    );
     const seen = new Map();
     results.forEach((r) => {
       if (r.status === "fulfilled") {

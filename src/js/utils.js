@@ -61,6 +61,10 @@ export class Utils {
       fat: Math.round((calories * 0.3) / 9),
       fiber: Math.max(2, Math.round(ingredientCount * 0.6)),
       sugar: Math.round(calories * 0.08) / 4,
+      // Estimated saturated fat
+      saturatedFat: Math.round(((calories * 0.1) / 9) * 10) / 10,
+      cholesterol: Math.round(calories * 0.02) / 1,
+      sodium: Math.round(calories * 0.05) / 1,
     };
   }
 

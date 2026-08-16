@@ -535,12 +535,7 @@
                   Nutrition Facts
                 </h2>
                 <div id="nutrition-facts-container">
-                  <p
-                    class="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2 mb-4"
-                  >
-                    <i class="fa-solid fa-circle-info mr-1"></i>
-                    Estimated — TheMealDB doesn't publish nutrition data.
-                  </p>
+                  <p class="text-sm text-gray-500 mb-4">Per serving</p>
 
                   <div
                     class="text-center py-4 mb-4 bg-linear-to-br from-emerald-50 to-teal-50 rounded-xl"
@@ -644,6 +639,42 @@
                         class="bg-pink-500 h-2 rounded-full progress-animate"
                         style="width: 24%"
                       ></div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                        <span class="text-gray-700">Saturated Fat</span>
+                      </div>
+                      <span
+                        id="nutri-saturated-fat"
+                        class="font-bold text-gray-900"
+                        >20g</span
+                      >
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2">
+                      <div
+                        id="nutri-saturated-fat-bar"
+                        class="bg-red-500 h-2 rounded-full progress-animate"
+                        style="width: 24%"
+                      ></div>
+                    </div>
+                  </div>
+                  <div class="mt-6 pt-6 border-t border-gray-100">
+                    <h3 class="text-sm font-semibold text-gray-900 mb-3">
+                      Other
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                      <div class="flex justify-between">
+                        <span class="text-gray-600">Cholesterol</span>
+                        <span id="nutri-cholesterol" class="font-medium"
+                          >0mg</span
+                        >
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-gray-600">Sodium</span>
+                        <span id="nutri-sodium" class="font-medium">359mg</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -861,21 +892,7 @@
                 <div
                   class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4"
                 >
-                  <i class="text-3xl text-gray-400" data-fa-i2svg=""
-                    ><svg
-                      class="svg-inline--fa fa-box-open"
-                      data-prefix="fas"
-                      data-icon="box-open"
-                      role="img"
-                      viewBox="0 0 640 512"
-                      aria-hidden="true"
-                      data-fa-i2svg=""
-                    >
-                      <path
-                        fill="currentColor"
-                        d="M560.3 237.2c10.4 11.8 28.3 14.4 41.8 5.5 14.7-9.8 18.7-29.7 8.9-44.4l-48-72c-2.8-4.2-6.6-7.7-11.1-10.2L351.4 4.7c-19.3-10.7-42.8-10.7-62.2 0L88.8 116c-5.4 3-9.7 7.4-12.6 12.8L27.7 218.7c-12.6 23.4-3.8 52.5 19.6 65.1l33 17.7 0 53.3c0 23 12.4 44.3 32.4 55.7l176 99.7c19.6 11.1 43.5 11.1 63.1 0l176-99.7c20.1-11.4 32.4-32.6 32.4-55.7l0-117.5zm-240-9.8L170.2 144 320.3 60.6 470.4 144 320.3 227.4zm-41.5 50.2l-21.3 46.2-165.8-88.8 25.4-47.2 161.7 89.8z"
-                      ></path></svg
-                  ></i>
+                  <i class="fa-solid fa-box-open text-3xl text-gray-400"></i>
                 </div>
                 <p class="text-gray-500 text-lg mb-2">No products to display</p>
                 <p class="text-gray-400 text-sm">

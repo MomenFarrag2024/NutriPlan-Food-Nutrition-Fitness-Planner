@@ -833,11 +833,21 @@ export class Components {
       data-entry-id="${escapeHtml(entry.id)}"
     >
       <div class="flex items-center gap-4 min-w-0">
-        <img
-          src="${escapeHtml(entry.image || "")}"
-          alt="${escapeHtml(entry.name)}"
-          class="w-14 h-14 rounded-xl object-cover shrink-0"
-        >
+        ${
+          entry.source === "custom"
+            ? `
+              <div class="w-14 h-14 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-utensils text-green-500 text-xl"></i>
+              </div>
+            `
+            : `
+              <img
+                src="${escapeHtml(entry.image || "")}"
+                alt="${escapeHtml(entry.name)}"
+                class="w-14 h-14 rounded-xl object-cover shrink-0"
+              />
+            `
+        }
         <div class="min-w-0">
           <p class="font-semibold text-gray-900 truncate">
             ${escapeHtml(entry.name)}

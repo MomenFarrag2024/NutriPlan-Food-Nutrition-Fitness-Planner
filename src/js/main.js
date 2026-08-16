@@ -1579,7 +1579,7 @@ renderMealDetail(meal) {
   // Days On Goal
   const goal = state.goals.calories;
   const daysOnGoal = days.filter(
-    (day) => day.calories >= goal
+    (day) => day.calories <= goal && day.calories > 0
   ).length;
   // Update UI
   const averageElement = document.getElementById("weekly-average");

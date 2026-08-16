@@ -1254,7 +1254,7 @@ export class App {
       if (window.Swal) {
         window.Swal.fire({
           title: "Clear today's log?",
-          text: "This can't be undone.",
+          text: "This will remove all logged food items for today.",
           icon: "warning",
           showCancelButton: true,
           confirmButtonText: "Yes, clear it!",
